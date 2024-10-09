@@ -1,74 +1,97 @@
-# log_archiver
+Log Archiver Tool
+Overview
 
-The idea for this project was taken from: https://roadmap.sh/projects/log-archive-tool
+This project is inspired by Roadmap.sh. The primary goal is to create a useful tool for archiving logs and uploading them to a remote location (Amazon S3) automatically. It includes a retention period to maintain healthy disk space.
 
-The goal was to make something useful for archiving logs and uploading them to a remote location (in this case, Amazon S3) in an automated fashion. I also wanted to include a rentention period to keep disk space healthy. This should be fairly simple to integrate into any existing environment and fine tuned to whatever requirements you may have. This project leverages Python, Bash, Terraform, and AWS. 
+This tool is designed to be easily integrated into any existing environment and can be fine-tuned to meet your specific requirements. The project leverages Python, Bash, Terraform, and AWS.
 
-I built this entirely in an Ubuntu container so it should carry over to whichever environment you choose, as long as it's Debian based. 
+The development was carried out in an Ubuntu container, ensuring compatibility with any Debian-based environment.
+Setup Instructions
+1. Clone the Repository
 
-Setup Instructions: 
+Clone the repository to your desired directory:
 
-Clone the Repository:
-You can clone to any directory of your choice, we will be building a separate directory to host the tool during the next steps. 
+bash
 
-Setup the Environment: 
-Run bash setup.sh to bootstrap the environment. Here are some things to keep note of.
+git clone <repository-url>
 
-Base directory for the project is here: /usr/local/bin/log_archiver 
-You can edit this variable in the script if you wish for it to be different. 
+2. Setup the Environment
 
-This will install the following:
-Apt Packages:
-Python3, Python3-pip 
-Tar
-Crontab
-AWS CLI
-Terraform
+Run the following command to bootstrap the environment:
 
-Pip Packages:
-Tarfile
-Boto 3
+bash
 
-The cron jobs will be created here as well. Currently set for log archiving to happen at 2am and s3 upload at 3am. Update the variables in the script if you wish for this to be different. 
+bash setup.sh
 
-Setup AWS:
-Run the following command: 
-aws configure 
+Notes:
 
-This will prompt for you input to your access key and secret. There are other ways to approach this so do what's best for you. This is the approach I used for development and I'm writing these instructions for local usage. 
+    The base directory for the project is set to /usr/local/bin/log_archiver. You can edit this variable in the script if you wish to use a different location.
+    The setup will install the following:
+        Apt Packages:
+            Python3
+            Python3-pip
+            Tar
+            Crontab
+            AWS CLI
+            Terraform
+        Pip Packages:
+            Tarfile
+            Boto3
 
-If you do not know how to obtain these credentials, refer to AWS IAM documentation. 
+The cron jobs will also be created during this setup. By default, log archiving occurs at 2 AM and S3 uploads at 3 AM. You can update the schedule in the script as needed.
+3. Setup AWS
 
-Setup Terraform and S3 Bucket:
+Run the following command to configure your AWS CLI:
 
-*Ensure you are in the directory you cloned the repo to, not directory of the project. 
-You can change the bucket name and region in the main.tf file.
-You do not need to use the provided Terraform, I just wanted to include it for local development purposes so you would have what you need to test full functionality. The method you create the bucket and upload files should be fine tuned to what works best for you. 
+bash
 
-Initialize Terraform
-terraform init 
+aws configure
 
-Test your configuration: 
+You will be prompted for your AWS access key and secret. For different approaches to authentication, refer to the AWS IAM documentation.
+4. Setup Terraform and S3 Bucket
+
+    Navigate to the directory where you cloned the repo (not the project directory).
+    You can change the bucket name and region in the main.tf file. The provided Terraform configuration is for local development and testing purposes.
+
+Initialize Terraform:
+
+bash
+
+terraform init
+
+Test your configuration:
+
+bash
+
 terraform plan
 
 Create the bucket:
+
+bash
+
 terraform apply
 
-Test the Setup:
+5. Test the Setup
 
-The Cron Job created will default to the logs found in /var/log and it will archive all of them. If you wish to specify a directory, the command to run will be:
+The cron job created will default to archiving logs found in /var/log. If you want to specify a different directory, run the command:
+
+bash
+
 python log_archiver.py /path/to/directory/
 
-If you just run:
+If you run:
+
+bash
+
 python log_archiver.py
 
-It will default to /var/log 
+It will default to /var/log.
 
-Of course, you should update the cron jobs if you have a specific directory you want to archive. 
+Remember to update the cron jobs if you want to archive a specific directory.
 
-The current retention period is set to 90 days, you can change this variable in the python script. 
+The current retention period is set to 90 days, which you can adjust in the Python script.
 
-Remember the Base Directory is the one you are using for Cron, so your edits should be made to the scripts in there, not the directory you cloned the repo to. 
+Important: The base directory used for cron jobs is the one specified in the setup. Make edits to the scripts in that directory, not in the directory where you cloned the repo.
+S3 Upload Script
 
-The S3 upload script is simple, you just run it. If you deviate from the Base Directory I provided, you need to update the variable, ARCHIVE_BASE_DIR, in the S3_upload.py script as well. 
-
+The S3 upload script is straightforward; just run it. If you deviate from the provided base directory, make sure to update the ARCHIVE_BASE_DIR variable in the upload_logs_to_s3.py script accordingly.
